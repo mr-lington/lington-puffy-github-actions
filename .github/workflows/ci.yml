@@ -12,7 +12,7 @@ permissions:
 
 env:
   AWS_REGION: eu-west-3
-  ECR_REPOSITORY: lington-puffy
+  ECR_REPOSITORY: mr-lington/lington-puffy-app
   AWS_IAM_ROLE: arn:aws:iam::468887949677:role/github-actions
 
 jobs:
