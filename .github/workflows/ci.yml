@@ -1,0 +1,59 @@
+
+name: Build & Push Java App to ECR (Git Tag Versioning)
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-west-3
+  ECR_REPOSITORY: lington-puffy
+  AWS_IAM_ROLE: arn:aws:iam::468887949677:role/github-actions
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Extract version from Git tag
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          audience: sts.amazon.com
+          role-to-assume: ${{ env.AWS_IAM_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t $ECR_REPOSITORY:$VERSION -t $ECR_REPOSITORY:latest .
+
+      - name: Push Docker images
+        run: |
+          docker tag $ECR_REPOSITORY:$VERSION             ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$VERSION
+
+          docker tag $ECR_REPOSITORY:latest             ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
+
+          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$VERSION
+          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
