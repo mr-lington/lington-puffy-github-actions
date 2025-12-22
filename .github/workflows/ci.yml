@@ -3,8 +3,13 @@ name: Build & Push Java App to ECR (Git Tag Versioning)
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches:
+    - main
+
+# on:
+#   push:
+#     tags:
+#       - "v*.*.*"
 
 permissions:
   id-token: write
@@ -12,7 +17,7 @@ permissions:
 
 env:
   AWS_REGION: eu-west-3
-  ECR_REPOSITORY: mr-lington/lington-puffy-app
+  #ECR_REPOSITORY: mr-lington/lington-puffy-app
   AWS_IAM_ROLE: arn:aws:iam::468887949677:role/github-actions
 
 jobs:
