@@ -1,36 +1,41 @@
-
 #!/bin/bash
-set -e
 
-VERSION_TYPE=$1
+VERSION=""
 
-if [[ -z "$VERSION_TYPE" ]]; then
-  echo "Usage: ./release.sh [major|minor|patch]"
-  exit 1
-fi
+while getopts v: flag; do
+  case "${flag}" in
+    v) VERSION=${OPTARG};;
+  esac
+done
 
 git fetch --tags
 
 CURRENT_VERSION=$(git describe --abbrev=0 --tags 2>/dev/null || echo "v0.1.0")
-echo "Current version: $CURRENT_VERSION"
+echo "Current Version: $CURRENT_VERSION"
 
-IFS='.' read -r V1 V2 V3 <<< "${CURRENT_VERSION#v}"
+IFS='.' read -r MAJOR MINOR PATCH <<< "${CURRENT_VERSION#v}"
 
-case "$VERSION_TYPE" in
+case "$VERSION" in
   major)
-    V1=$((V1+1)); V2=0; V3=0 ;;
+    MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
   minor)
-    V2=$((V2+1)); V3=0 ;;
+    MINOR=$((MINOR+1)); PATCH=0 ;;
   patch)
-    V3=$((V3+1)) ;;
+    PATCH=$((PATCH+1)) ;;
   *)
-    echo "Invalid version type"
-    exit 1
-    ;;
+    echo "Usage: -v [major|minor|patch]"
+    exit 1 ;;
 esac
 
-NEW_TAG="v$V1.$V2.$V3"
+NEW_TAG="v$MAJOR.$MINOR.$PATCH"
 echo "Creating tag $NEW_TAG"
+
+if git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
+  echo "Tag already exists"
+  exit 0
+fi
 
 git tag "$NEW_TAG"
 git push origin "$NEW_TAG"
+
+echo "new-tag=$NEW_TAG" >> "$GITHUB_OUTPUT"

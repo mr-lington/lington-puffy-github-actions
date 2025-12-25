@@ -1,0 +1,50 @@
+name: Build & Push Docker Image
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-west-3
+  ECR_REPOSITORY: lington-puffy-app1
+  AWS_IAM_ROLE: arn:aws:iam::468887949677:role/github-actions
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_IAM_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push
+        run: |
+          docker build -t $ECR_REPOSITORY:$VERSION -t $ECR_REPOSITORY:latest .
+
+          docker tag $ECR_REPOSITORY:$VERSION \
+            ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$VERSION
+
+          docker tag $ECR_REPOSITORY:latest \
+            ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
+
+          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$VERSION
+          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
