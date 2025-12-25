@@ -126,7 +126,7 @@ on:
 
 permissions:
   contents: write      # needed to create & push git tags
-  id-token: write     # needed for AWS OIDC
+  id-token: write     # needed for AWS OIDC lala
   contents: read
 
 env:
