@@ -123,11 +123,11 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
-  contents: write      # needed to create & push git tags
-  id-token: write     # needed for AWS OIDC lala
-  contents: read
+  contents: write
+  id-token: write
 
 env:
   AWS_REGION: eu-west-3
@@ -178,7 +178,6 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build Docker image
