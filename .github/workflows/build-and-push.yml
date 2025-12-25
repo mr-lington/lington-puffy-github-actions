@@ -3,7 +3,7 @@ name: Build & Push Docker Image
 on:
   push:
     tags:
-      - "v*.*.*"
+      - "v*"
 
 permissions:
   id-token: write
