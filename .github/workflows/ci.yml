@@ -68,7 +68,7 @@ name: Build and Push App to ECR
 # TODO: Update the following variables:
 env:
   AWS_REGION: eu-west-3
-  AWS_IAM_ROLE: arn:aws:iam::468887949677:role/github-actions
+  AWS_IAM_ROLE: arn:aws:iam::468887949677:role/github-actions   arn:aws:iam::468887949677:oidc-provider/token.actions.githubusercontent.com
 
 on:
   push:
