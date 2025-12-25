@@ -117,45 +117,45 @@
 
 
 
-# name: Auto Version + Build & Push Docker Image
+name: Auto Version + Build & Push Docker Image
 
-# on:
-#   push:
-#     branches:
-#       - main
-#   workflow_dispatch:
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
-# permissions:
-#   contents: write
-#   id-token: write
+permissions:
+  contents: write
+  id-token: write
 
-# env:
-#   AWS_REGION: eu-west-3
-#   ECR_REPOSITORY: lington-puffy-app1
-#   AWS_IAM_ROLE: arn:aws:iam::468887949677:role/github-actions
+env:
+  AWS_REGION: eu-west-3
+  ECR_REPOSITORY: lington-puffy-app1
+  AWS_IAM_ROLE: arn:aws:iam::468887949677:role/github-actions
 
-# jobs:
-#   bump:
-#     name: Auto Bump Version
-#     runs-on: ubuntu-latest
+jobs:
+  bump:
+    name: Auto Bump Version
+    runs-on: ubuntu-latest
 
-#     outputs:
-#       version: ${{ steps.version.outputs.version }}
+    outputs:
+      version: ${{ steps.version.outputs.version }}
 
-#     steps:
-#       - name: Checkout repo
-#         uses: actions/checkout@v4
-#         with:
-#           fetch-depth: 0
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-#       - name: Bump patch version
-#         id: version
-#         run: |
-#           bash scripts/version.sh -v patch
-#           git fetch --tags
-#           VERSION=$(git describe --tags --abbrev=0)
-#           echo "version=${VERSION#v}" >> $GITHUB_OUTPUT
-#           echo "Bumped version to $VERSION"
+      - name: Bump patch version
+        id: version
+        run: |
+          bash scripts/version.sh -v patch
+          git fetch --tags
+          VERSION=$(git describe --tags --abbrev=0)
+          echo "version=${VERSION#v}" >> $GITHUB_OUTPUT
+          echo "Bumped version to $VERSION"
 
 #   build:
 #     name: Build & Push Docker Image
