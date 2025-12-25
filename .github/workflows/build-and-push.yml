@@ -51,66 +51,70 @@
 
 
 
-name: Build & Push Docker Image
 
-on:
-  workflow_run:
-    workflows: ["Auto Bump Version"]
-    types:
-      - completed
+# name: Build & Push Docker Image
 
-permissions:
-  id-token: write   # required for OIDC
-  contents: read
+# on:
+#   workflow_run:
+#     workflows: ["Auto Bump Version"]
+#     types:
+#       - completed
 
-env:
-  AWS_REGION: eu-west-3
-  ECR_REPOSITORY: lington-puffy
-  AWS_IAM_ROLE: arn:aws:iam::468887949677:role/github-actions
+# permissions:
+#   id-token: write   # required for OIDC
+#   contents: read
 
-jobs:
-  build:
-    # only run if version bump succeeded
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+# env:
+#   AWS_REGION: eu-west-3
+#   ECR_REPOSITORY: lington-puffy
+#   AWS_IAM_ROLE: arn:aws:iam::468887949677:role/github-actions
 
-    runs-on: ubuntu-latest
+# jobs:
+#   build:
+#     # only run if version bump succeeded
+#     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+#     runs-on: ubuntu-latest
 
-      - name: Get latest version tag
-        run: |
-          git fetch --tags
-          VERSION=$(git describe --tags --abbrev=0)
-          echo "VERSION=${VERSION#v}" >> $GITHUB_ENV
-          echo "Using version: $VERSION"
+#     steps:
+#       - name: Checkout repo
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
 
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ env.AWS_IAM_ROLE }}
-          aws-region: ${{ env.AWS_REGION }}
+#       - name: Get latest version tag
+#         run: |
+#           git fetch --tags
+#           VERSION=$(git describe --tags --abbrev=0)
+#           echo "VERSION=${VERSION#v}" >> $GITHUB_ENV
+#           echo "Using version: $VERSION"
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+#       - name: Configure AWS credentials (OIDC)
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           role-to-assume: ${{ env.AWS_IAM_ROLE }}
+#           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Build Docker image
-        run: |
-          docker build \
-            -t $ECR_REPOSITORY:$VERSION \
-            -t $ECR_REPOSITORY:latest .
+#       - name: Login to Amazon ECR
+#         id: login-ecr
+#         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Push Docker image
-        run: |
-          docker tag $ECR_REPOSITORY:$VERSION \
-            ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$VERSION
+#       - name: Build Docker image
+#         run: |
+#           docker build \
+#             -t $ECR_REPOSITORY:$VERSION \
+#             -t $ECR_REPOSITORY:latest .
 
-          docker tag $ECR_REPOSITORY:latest \
-            ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
+#       - name: Push Docker image
+#         run: |
+#           docker tag $ECR_REPOSITORY:$VERSION \
+#             ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$VERSION
 
-          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$VERSION
-          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
+#           docker tag $ECR_REPOSITORY:latest \
+#             ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
+
+#           docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$VERSION
+#           docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
+
+
+

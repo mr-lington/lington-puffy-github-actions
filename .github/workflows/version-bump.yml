@@ -1,22 +1,22 @@
-name: Auto Bump Version
+# name: Auto Bump Version
 
-on:
-  push:
-    branches:
-      - main
+# on:
+#   push:
+#     branches:
+#       - main
 
-permissions:
-  contents: write   # allows creating and pushing tags
+# permissions:
+#   contents: write   # allows creating and pushing tags
 
-jobs:
-  bump:
-    runs-on: ubuntu-latest
+# jobs:
+#   bump:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+#     steps:
+#       - name: Checkout repo
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
 
-      - name: Bump patch version
-        run: bash scripts/version.sh -v patch
+#       - name: Bump patch version
+#         run: bash scripts/version.sh -v patch

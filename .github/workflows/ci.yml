@@ -114,3 +114,86 @@
 #       run: |
 #         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
 #         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+
+
+name: Auto Version + Build & Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write      # needed to create & push git tags
+  id-token: write     # needed for AWS OIDC
+  contents: read
+
+env:
+  AWS_REGION: eu-west-3
+  ECR_REPOSITORY: lington-puffy-app1
+  AWS_IAM_ROLE: arn:aws:iam::468887949677:role/github-actions
+
+jobs:
+  bump:
+    name: Auto Bump Version
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump patch version
+        id: version
+        run: |
+          bash scripts/version.sh -v patch
+          git fetch --tags
+          VERSION=$(git describe --tags --abbrev=0)
+          echo "version=${VERSION#v}" >> $GITHUB_OUTPUT
+          echo "Bumped version to $VERSION"
+
+  build:
+    name: Build & Push Docker Image
+    needs: bump
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set version
+        run: |
+          echo "VERSION=${{ needs.bump.outputs.version }}" >> $GITHUB_ENV
+          echo "Using version $VERSION"
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_IAM_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t $ECR_REPOSITORY:$VERSION \
+            -t $ECR_REPOSITORY:latest .
+
+      - name: Push Docker image
+        run: |
+          docker tag $ECR_REPOSITORY:$VERSION \
+            ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$VERSION
+
+          docker tag $ECR_REPOSITORY:latest \
+            ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
+
+          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$VERSION
+          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
