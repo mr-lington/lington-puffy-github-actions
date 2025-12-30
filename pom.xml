@@ -7,7 +7,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- ✅ Spring Boot parent (CRITICAL) -->
+    
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -23,27 +23,27 @@
     <name>lington-puffy</name>
     <description>Spring Boot app deployed via GitOps (ArgoCD + EKS)</description>
 
-    <!-- ✅ Java version -->
+    
     <properties>
         <java.version>17</java.version>
     </properties>
 
-    <!-- ✅ Dependencies -->
+    
     <dependencies>
 
-        <!-- Spring Boot Web -->
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Actuator (optional but recommended) -->
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- Test -->
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -52,11 +52,11 @@
 
     </dependencies>
 
-    <!-- ✅ THIS IS THE MOST IMPORTANT PART -->
+    
     <build>
         <plugins>
 
-            <!-- 🔥 Makes the JAR executable -->
+            
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
